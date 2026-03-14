@@ -27,7 +27,6 @@ class VoiceInput(BaseModel):
     type: Literal["voice_input"]
     text: str = Field(min_length=1)
     user_id: str = Field(min_length=1)
-    request_location: str = Field(min_length=1)
     timestamp: datetime
 
 
