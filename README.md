@@ -279,7 +279,13 @@ If event `user_id` differs from state `user_id`, the node logs a warning and con
 
 ## Production notes
 
-- Configure structured logging handlers in your host runtime.
-- Persist serialized `UserInteractionState` for real multi-turn continuity across processes.
-- Add authN/authZ and tenant isolation checks before forwarding requests.
-- Keep this agent focused on interaction orchestration; place intent/planning logic in downstream agents.
+- The node is intentionally scoped to interaction/orchestration only.
+- It does **not** classify intent or perform downstream planning.
+
+
+## Implementation highlights
+
+- Strong schema validation for state and incoming events (Pydantic).
+- Async LangGraph node with conditional routing.
+- Clarification loop support via `await_user` routing and re-entry when a new event is attached in-run.
+- Structured logging hooks and graceful GUI-facing error fallback for malformed events.
