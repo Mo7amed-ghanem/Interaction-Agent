@@ -13,6 +13,14 @@ def _passthrough(state: Dict[str, Any]) -> Dict[str, Any]:
     return state
 
 
+def _await_user_loop_router(state: Dict[str, Any]) -> str:
+    incoming_event: Dict[str, Any] = state.get("incoming_event", {})
+    # If a fresh event is supplied in the same run, continue loop; otherwise pause.
+    if incoming_event:
+        return "continue"
+    return "pause"
+
+
 def build_user_interaction_graph():
     """Build and compile the user interaction graph.
 
@@ -20,6 +28,7 @@ def build_user_interaction_graph():
     - `to_intent`: send payload downstream to Intent Agent.
     - `to_gui`: send formatted GUI message to frontend.
     - `await_user`: keep state and wait for next user turn.
+    - `idle`: no-op state update.
     """
     graph = StateGraph(dict)
 
@@ -36,10 +45,18 @@ def build_user_interaction_graph():
             "to_intent": "emit_intent_payload",
             "to_gui": "emit_gui_message",
             "await_user": "wait_for_user",
+            "idle": END,
+        },
+    )
+    graph.add_conditional_edges(
+        "wait_for_user",
+        _await_user_loop_router,
+        {
+            "continue": "user_interaction",
+            "pause": END,
         },
     )
     graph.add_edge("emit_intent_payload", END)
     graph.add_edge("emit_gui_message", END)
-    graph.add_edge("wait_for_user", END)
 
     return graph.compile()
