@@ -36,7 +36,6 @@ initial = UserInteractionState(
         "type": "voice_input",
         "text": "Can you set the meeting room to 22 degrees?",
         "user_id": "u-01",
-        "request_location": "meeting_room_1",
         "timestamp": "2026-03-14T10:45:00Z",
     },
 )
@@ -50,3 +49,11 @@ print(result["gui_message"])
 
 - The node is intentionally scoped to interaction/orchestration only.
 - It does **not** classify intent or perform downstream planning.
+
+
+## Implementation highlights
+
+- Strong schema validation for state and incoming events (Pydantic).
+- Async LangGraph node with conditional routing.
+- Clarification loop support via `await_user` routing and re-entry when a new event is attached in-run.
+- Structured logging hooks and graceful GUI-facing error fallback for malformed events.
